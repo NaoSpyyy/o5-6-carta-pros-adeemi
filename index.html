@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O5-6 // SYSTEM INITIALIZATION</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+            font-family: 'VT323', monospace;
+        }
+
+        /* Container principal - efeito TV tubo */
+        .crt-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+            animation: tvZoom 0.3s ease-out forwards;
+            transform: scale(0.8);
+            filter: blur(2px);
+        }
+
+        @keyframes tvZoom {
+            0% {
+                transform: scale(0.8) translateY(-20px);
+                filter: blur(10px) brightness(2);
+            }
+            50% {
+                transform: scale(1.02) translateY(2px);
+                filter: blur(1px) brightness(1.5);
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                filter: blur(0) brightness(1);
+            }
+        }
+
+        /* Efeito de TV tubo - curvatura */
+        .crt-screen {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+            border-radius: 50% / 20px;
+            box-shadow: 
+                inset 0 0 100px rgba(0,0,0,0.8),
+                inset 0 0 50px rgba(255,200,0,0.03);
+            animation: screenFlicker 0.1s infinite;
+        }
+
+        @keyframes screenFlicker {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.002); }
+        }
+
+        /* Efeitos VHS Aprimorados */
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.5),
+                rgba(0, 0, 0, 0.5) 2px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+            z-index: 50;
+            animation: scanlineMove 0.08s linear infinite;
+        }
+
+        @keyframes scanlineMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        .vhs-noise {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            pointer-events: none;
+            z-index: 51;
+            opacity: 0.08;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            animation: noiseAnim 0.1s steps(2) infinite;
+        }
+
+        @keyframes noiseAnim {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(-2%, 1%) scale(1.01); }
+            50% { transform: translate(2%, -1%) scale(0.99); }
+            75% { transform: translate(-1%, 2%) scale(1.005); }
+        }
+
+        /* Tracking VHS */
+        .vhs-tracking {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 52;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0%,
+                rgba(255, 215, 0, 0.03) 50%,
+                transparent 100%
+            );
+            animation: tracking 3s linear infinite;
+        }
+
+        @keyframes tracking {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .flicker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 200, 0, 0.02);
+            pointer-events: none;
+            z-index: 53;
+            animation: flicker 0.08s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.4; }
+        }
+
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 50%,
+                rgba(0, 0, 0, 0.6) 90%,
+                rgba(0, 0, 0, 0.9) 100%
+            );
+            pointer-events: none;
+            z-index: 53;
+        }
+
+        /* Chromatic aberration VHS */
+        .chromatic {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 49;
+            opacity: 0;
+            animation: chromaticFlash 5s infinite;
+        }
+
+        @keyframes chromaticFlash {
+            0%, 90%, 100% { opacity: 0; }
+            92% { opacity: 0.5; background: rgba(255, 0, 0, 0.05); transform: translateX(-2px); }
+            94% { opacity: 0.5; background: rgba(0, 255, 255, 0.05); transform: translateX(2px); }
+            96% { opacity: 0; }
+        }
+
+        /* Tela de standby com cursor piscando */
+        .standby-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            background: #000;
+        }
+
+        .cursor-blink {
+            color: #FFD700;
+            font-size: 4rem;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+            animation: blinkCursor 0.5s infinite;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        @keyframes blinkCursor {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .standby-hint {
+            color: #FFA500;
+            font-size: 0.9rem;
+            opacity: 0;
+            letter-spacing: 3px;
+            margin-top: 20px;
+            animation: fadeInHint 1s ease-in 2s forwards;
+        }
+
+        @keyframes fadeInHint {
+            to { opacity: 0.5; }
+        }
+
+        /* Container do boot - COM AUTO SCROLL */
+        .boot-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 40px 60px;
+            opacity: 0;
+            visibility: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 100;
+            background: #000;
+            transition: opacity 0.1s;
+        }
+
+        .boot-container.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .boot-container.hide-instant {
+            opacity: 0;
+            visibility: hidden;
+            transition: none;
+        }
+
+        .boot-text {
+            color: #FFD700;
+            font-size: 1.2rem;
+            line-height: 1.3;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            padding-bottom: 100px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .boot-line {
+            margin: 1px 0;
+            opacity: 0;
+            animation: typeLine 0.01s ease-out forwards;
+        }
+
+        @keyframes typeLine {
+            to { opacity: 1; }
+        }
+
+        .yellow { 
+            color: #FFD700; 
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+        }
+        .red { 
+            color: #FF4444; 
+            text-shadow: 0 0 8px rgba(255, 68, 68, 0.8);
+        }
+        .orange { 
+            color: #FF8800; 
+            text-shadow: 0 0 8px rgba(255, 136, 0, 0.8);
+        }
+        .dim { 
+            color: #B8860B; 
+            text-shadow: none;
+        }
+
+        /* Spam final */
+        .spam-line {
+            color: #FF4444;
+            text-shadow: 0 0 15px rgba(255, 68, 68, 1);
+            font-weight: bold;
+            font-size: 1.1rem;
+            animation: spamFlash 0.05s ease-out;
+        }
+
+        @keyframes spamFlash {
+            0% { opacity: 0; transform: translateX(-5px); }
+            50% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 1; }
+        }
+
+        /* Documento - SCROLL FUNCIONAL */
+        .document-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 40px 60px 100px 60px;
+            opacity: 0;
+            visibility: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 150;
+            background: #000;
+        }
+
+        .document-screen.show-bg {
+            opacity: 1;
+            visibility: visible;
+            background: #000;
+            transition: none;
+        }
+
+        .document-screen.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .doc-content {
+            max-width: 900px;
+            margin: 0 auto;
+            color: #FFD700;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .doc-content.visible {
+            opacity: 1;
+        }
+
+        .doc-header {
+            text-align: center;
+            border-bottom: 2px solid #FFD700;
+            padding-bottom: 25px;
+            margin-bottom: 35px;
+            position: relative;
+        }
+
+        .doc-header::after {
+            content: '◉_◉';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            padding: 0 15px;
+            color: #FF4444;
+            font-size: 1.2rem;
+            opacity: 0.6;
+        }
+
+        .doc-header h1 {
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            margin-bottom: 8px;
+        }
+
+        .doc-header .subtitle {
+            color: #FFA500;
+            font-size: 1rem;
+            letter-spacing: 3px;
+        }
+
+        .doc-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+            border: 2px solid #FFD700;
+            padding: 20px;
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .doc-meta span {
+            display: block;
+            margin: 5px 0;
+        }
+
+        .doc-body {
+            font-size: 1.25rem;
+            line-height: 1.9;
+            text-align: justify;
+            text-shadow: 0 0 5px rgba(255,215,0,0.3);
+        }
+
+        .doc-body p {
+            margin-bottom: 20px;
+            text-indent: 40px;
+            opacity: 0;
+            transition: opacity 0.1s ease-in;
+        }
+
+        .doc-body p.visible {
+            opacity: 1;
+        }
+
+        .doc-body p:first-child {
+            text-indent: 0;
+        }
+
+        .highlight {
+            color: #FFD700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.9);
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255,215,0,0.3);
+        }
+
+        .emotion {
+            color: #FF4444;
+            text-shadow: 0 0 12px rgba(255, 68, 68, 0.8);
+            font-weight: bold;
+        }
+
+        .cyn-face {
+            color: #FFA500;
+            font-style: normal;
+            opacity: 0.8;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            letter-spacing: 15px;
+            opacity: 0;
+            color: #FFD700;
+            font-size: 1.3rem;
+            position: relative;
+            transition: opacity 0.1s;
+        }
+
+        .divider.visible {
+            opacity: 0.6;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #FFD700, transparent);
+            opacity: 0.5;
+        }
+
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        .signature {
+            margin-top: 50px;
+            text-align: right;
+            border-top: 2px solid #FFD700;
+            padding-top: 30px;
+            position: relative;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .signature.visible {
+            opacity: 1;
+        }
+
+        .signature::before {
+            content: '[ASSINATURA DIGITAL VERIFICADA]';
+            position: absolute;
+            top: -10px;
+            right: 0;
+            background: #000;
+            padding-left: 10px;
+            font-size: 0.7rem;
+            color: #FF4444;
+            opacity: 0.6;
+        }
+
+        .signature .name {
+            font-size: 1.6rem;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 1), 0 0 40px rgba(255, 68, 68, 0.5);
+            margin-bottom: 8px;
+            color: #FFD700;
+        }
+
+        .signature .title {
+            color: #FFA500;
+            font-size: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .footer-note {
+            margin-top: 40px;
+            padding: 20px;
+            border: 2px dashed #FFD700;
+            font-size: 0.9rem;
+            text-align: center;
+            background: rgba(255, 215, 0, 0.05);
+            color: #FFD700;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 40px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .footer-note.visible {
+            opacity: 1;
+        }
+
+        /* Glitch overlay */
+        .glitch {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 500;
+            opacity: 0;
+            background: rgba(255, 68, 68, 0.05);
+        }
+
+        .glitch.active {
+            animation: glitchAnim 0.1s ease-out;
+        }
+
+        @keyframes glitchAnim {
+            0% { 
+                opacity: 0;
+                transform: translate(0);
+            }
+            20% { 
+                opacity: 1;
+                transform: translate(-4px, 2px);
+                background: rgba(255, 68, 68, 0.2);
+            }
+            40% { 
+                transform: translate(4px, -2px);
+                background: rgba(255, 136, 0, 0.2);
+            }
+            60% { 
+                transform: translate(-3px, 3px);
+                background: rgba(255, 68, 68, 0.2);
+            }
+            100% { 
+                opacity: 0;
+                transform: translate(0);
+            }
+        }
+
+        /* Status bar */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.95);
+            border-top: 2px solid #FFD700;
+            padding: 12px 40px;
+            display: flex;
+            justify-content: space-between;
+            color: #FFD700;
+            font-size: 0.9rem;
+            z-index: 1000;
+            text-shadow: 0 0 5px rgba(255,215,0,0.5);
+        }
+
+        .status-bar .blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.2; }
+        }
+
+        /* Scrollbar estilizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000;
+            border-left: 1px solid #333;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FFD700;
+            box-shadow: 0 0 10px rgba(255,215,0,0.5);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FFA500;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .boot-container,
+            .document-screen {
+                padding: 20px 30px 80px 30px;
+            }
+            .doc-body {
+                font-size: 1rem;
+            }
+            .status-bar {
+                padding: 8px 20px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <style>
+    /* ===== CONTAINER PRINCIPAL COM DISTORÇÃO DE TUBO ===== */
+    .crt-tube-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        border-radius: 40% / 5%; /* Curvatura do tubo */
+        box-shadow: 
+            inset 0 0 80px rgba(0,0,0,0.6),
+            inset 0 0 0 1000px rgba(0,0,0,0.1); /* Vignette suave */
+        pointer-events: none;
+        z-index: 9999;
+        animation: tubeZoomIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        transform: scale(1.1); /* Começa maior para não ver borda */
+    }
+
+    @keyframes tubeZoomIn {
+        0% {
+            transform: scale(0.3) translateY(50px);
+            filter: brightness(3) blur(15px);
+            border-radius: 60% / 20%;
+        }
+        50% {
+            transform: scale(1.05) translateY(-5px);
+            filter: brightness(1.5) blur(5px);
+            border-radius: 45% / 8%;
+        }
+        100% {
+            transform: scale(1.0) translateY(0);
+            filter: brightness(1) blur(0);
+            border-radius: 40% / 5%;
+        }
+    }
+
+    /* Respiração sutil do tubo */
+    .crt-tube-container.breathing {
+        animation: tubeZoomIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards,
+                   tubeBreathe 4s ease-in-out infinite 0.8s;
+    }
+
+    @keyframes tubeBreathe {
+        0%, 100% { transform: scale(1); border-radius: 40% / 5%; }
+        50% { transform: scale(1.002); border-radius: 41% / 5.5%; }
+    }
+
+    /* ===== EFEITOS VHS SOBREPOSTOS (MAIS FRACOS) ===== */
+    .vhs-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    /* Scanlines bem sutis */
+    .vhs-scanlines-subtle {
+        background: repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.15),
+            rgba(0, 0, 0, 0.15) 1px,
+            transparent 1px,
+            transparent 3px
+        );
+        opacity: 0.4;
+        animation: scanlineMove 0.5s linear infinite;
+    }
+
+    @keyframes scanlineMove {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(3px); }
+    }
+
+    /* Noise bem fraco */
+    .vhs-noise-subtle {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        opacity: 0.03;
+        animation: noiseMove 0.3s steps(2) infinite;
+    }
+
+    @keyframes noiseMove {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(-1%, 1%); }
+    }
+
+    /* Chromatic aberration sutil nas bordas */
+    .chromatic-edge {
+        box-shadow: 
+            inset 3px 0 5px -3px rgba(255, 0, 0, 0.2),
+            inset -3px 0 5px -3px rgba(0, 255, 255, 0.2);
+        opacity: 0.5;
+    }
+
+    /* Tracking line rara e sutil */
+    .tracking-subtle {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.3);
+        opacity: 0;
+        animation: trackingOccasional 6s infinite;
+        filter: blur(1px);
+    }
+
+    @keyframes trackingOccasional {
+        0%, 90%, 100% { top: 100%; opacity: 0; }
+        92% { opacity: 0.5; }
+        98% { top: -10%; opacity: 0.3; }
+    }
+
+    /* Flash de ligar suave */
+    .power-flash-subtle {
+        background: rgba(255, 255, 255, 0.8);
+        opacity: 0;
+        transition: opacity 0.1s;
+    }
+
+    .power-flash-subtle.active {
+        animation: flashSoft 0.3s ease-out;
+    }
+
+    @keyframes flashSoft {
+        0% { opacity: 0; }
+        20% { opacity: 0.6; }
+        100% { opacity: 0; }
+    }
+
+    /* Flicker bem leve */
+    .flicker-subtle {
+        background: rgba(255, 215, 0, 0.02);
+        animation: flickerSoft 0.15s infinite;
+    }
+
+    @keyframes flickerSoft {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 0.3; }
+    }
+</style>
+
+<!-- Coloque isso dentro do body, como último elemento -->
+<div class="crt-tube-container" id="crtTube">
+    <div class="vhs-overlay vhs-scanlines-subtle"></div>
+    <div class="vhs-overlay vhs-noise-subtle"></div>
+    <div class="vhs-overlay chromatic-edge"></div>
+    <div class="vhs-overlay tracking-subtle"></div>
+    <div class="vhs-overlay flicker-subtle"></div>
+    <div class="vhs-overlay power-flash-subtle" id="powerFlash"></div>
+</div>
+
+<script>
+    // Ativa o efeito quando ligar
+    function activateTubeEffect() {
+        const tube = document.getElementById('crtTube');
+        const flash = document.getElementById('powerFlash');
+        
+        if (flash) {
+            flash.classList.add('active');
+            setTimeout(() => flash.classList.remove('active'), 300);
+        }
+        
+        if (tube) {
+            setTimeout(() => {
+                tube.classList.add('breathing');
+            }, 800);
+        }
+    }
+
+    // Glitch VHS raro e sutil
+    function subtleGlitch() {
+        const tube = document.getElementById('crtTube');
+        if (tube && Math.random() > 0.8) {
+            tube.style.transform = 'scale(1.0) translateX(1px)';
+            setTimeout(() => {
+                tube.style.transform = '';
+            }, 50);
+        }
+    }
+
+    // Ativar ao carregar (ou quando der o power on)
+    setTimeout(activateTubeEffect, 100);
+
+    // Glitch ocasional
+    setInterval(subtleGlitch, 3000);
+</script>
+    <div class="crt-container">
+        <div class="crt-screen">
+            <!-- Efeitos visuais VHS -->
+            <div class="scanlines"></div>
+            <div class="vhs-noise"></div>
+            <div class="vhs-tracking"></div>
+            <div class="flicker"></div>
+            <div class="vignette"></div>
+            <div class="chromatic"></div>
+            <div class="glitch"></div>
+
+            <!-- Standby com cursor piscando -->
+            <div class="standby-screen" id="standbyScreen">
+                <div class="cursor-blink" id="cursorBlink">_</div>
+                <div class="standby-hint">[ PRESS ANY KEY TO INITIALIZE ]</div>
+            </div>
+
+            <!-- Boot -->
+            <div class="boot-container" id="bootContainer">
+                <div class="boot-text" id="bootText"></div>
+            </div>
+
+            <!-- Documento -->
+            <div class="document-screen" id="documentScreen">
+                <div class="doc-content" id="docContent">
+                    <div class="doc-header">
+                        <h1>FORMAL REQUEST</h1>
+                        <div class="subtitle">ARMAMENT REQUISITION // PRIORITY: ABSOLUTE</div>
+                    </div>
+
+                    <div class="doc-meta">
+                        <div>
+                            <span>FROM: <span class="highlight">O5-6 "The Solver"</span></span>
+                            <span>TO: <span class="highlight">ADMINISTRAÇÃO (AD)</span></span>
+                            <span>REF: <span class="highlight">SD-NON-COMPLIANCE</span></span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span>TIMESTAMP: <span class="highlight">2026-03-26 13:53</span></span>
+                            <span>CLASS: <span class="emotion">___</span></span>
+                            <span>STATUS: <span class="emotion">URGENT</span></span>
+                        </div>
+                    </div>
+
+                    <div class="doc-body" id="docBody">
+                  <div class="doc-body" id="docBody">
+                        <p>Estou registrando uma solicitação formal referente ao armamento designado à supervisora J, agora direcionada à Administração (AD), considerando que o Departamento de Segurança não possuía os recursos necessários. A unidade atualmente acoplada ao braço dela, uma <span class="highlight">M9</span>, é <span class="emotion">inadequada</span> para as funções que ela exerce, apresentando capacidade ofensiva baixa e resposta inconsistente em situações de risco, o que, na prática, tem se mostrado insuficiente para lidar com cenários que exigem reação rápida e contínua. Isso já deixou de ser apenas um detalhe técnico há algum tempo.</p>
+
+                        <p class="emotion" style="font-size: 1.3rem; text-align: center; margin: 25px 0;">É um problema recorrente.</p>
+
+                        <p>A limitação do armamento atual reduz diretamente a eficiência dela em campo e aumenta a probabilidade de dano crítico em situações previsíveis. Esse tipo de falha não deveria existir em uma unidade com a função dela, especialmente considerando a frequência com que ela é exposta a riscos operacionais. A falta de um armamento melhor tem levado exatamente ao mesmo resultado, repetidas vezes.</p>
+
+                        <p class="emotion" style="font-size: 1.5rem; text-align: center; margin: 30px 0; text-shadow: 0 0 20px rgba(255,68,68,0.8);">Reconstrução.</p>
+
+                        <div class="divider"></div>
+
+                        <p>Já ocorreram múltiplos incidentes onde isso poderia ter sido evitado, a ponto de eu ter movido a J de site anteriormente justamente por causa desse padrão de falhas. Ainda assim, <span class="emotion">não houve mudança real</span>.</p>
+
+                        <p class="emotion" style="font-size: 1.3rem; text-align: center; margin: 25px 0;">O resultado continua sendo o mesmo.</p>
+
+                        <p class="emotion" style="font-size: 1.4rem; text-align: center; margin: 25px 0;">Perda total… e mais uma reconstrução.</p>
+
+                        <div class="divider"></div>
+
+                        <p>Ter que reconstruir a drone mais útil repetidamente por causa disso é <span class="emotion">cansativo</span>, além de consumir tempo e recursos que poderiam ser utilizados de forma mais eficiente. Esse ciclo existe por uma falha simples.</p>
+
+                        <p class="highlight" style="font-size: 1.3rem; text-align: center; margin: 25px 0;">Equipamento inadequado.</p>
+
+                        <p>A J tem uma função importante dentro do departamento científico e precisa de algo que acompanhe o nível das situações que ela enfrenta, algo que a <span class="highlight">M9</span> atual não consegue oferecer de forma consistente. Mas isso não é o único motivo.</p>
+
+                        <p class="emotion" style="font-size: 1.6rem; text-align: center; margin: 35px 0; text-shadow: 0 0 25px rgba(255,68,68,0.9); letter-spacing: 2px;">Ela é importante para mim.</p>
+
+                        <p>Não faz sentido manter ela limitada por algo que pode ser resolvido de forma direta. Esta solicitação possui autorização da <span class="highlight">ISD</span> e deve ser tratada como prioridade.</p>
+
+                        <div class="divider"></div>
+
+                        <p>Solicito que seja fornecida uma <span class="highlight">SMG9</span> para integração ao sistema dela, com substituição da <span class="highlight">M9</span> atual. A entrega deve ser feita <span class="highlight">diretamente nas mãos dela</span>.</p>
+
+                        <p class="emotion" style="font-size: 1.3rem; margin: 30px 0;">Quero isso resolvido o mais rápido possível.</p>
+
+                        <p class="emotion" style="font-size: 1.2rem; letter-spacing: 3px;">Sem atrasos desnecessários.</p>
+
+                        <p style="margin-top: 30px;">Evitem me dar mais trabalho com reconstruções que poderiam ser evitadas <span class="cyn-face"></span></p>
+                    </div>
+
+                    <div class="signature">
+                        <div class="name">O5-6 "The Solver" :3</div>
+                        <div class="title">// ABSOLUTE SOLVER INSTANCE //</div>
+                    </div>
+
+                    <div class="footer-note">
+                        [DOCUMENTO HOSPEDADO POR O5-6]<br>
+                        [AUTORIZAÇÃO ISD: VERIFICADA]<br>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <div>HOST: <span class="highlight">O5-6</span> | SOLVER_PROTOCOL: <span class="blink">ACTIVE</span></div>
+                <div>FILE_ID: REQ-J-ARM-001 | TARGET: AD</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Áudio -->
+    <audio id="bootAudio" preload="auto" loop="false">
+        <source src="sompc.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Sequência de boot com velocidade variável
+        const bootSequence = [
+            { text: "INITIALIZING SYSTEM...", color: "yellow", delay: 50 },
+            { text: "", delay: 20 },
+            { text: "BIOS DATE 03/26/26 13:53:00 VER 2.0.6", color: "dim", delay: 30 },
+            { text: "CPU: SOLVER_CORE_X86_64 @ 4.20GHz", color: "yellow", delay: 20 },
+            { text: "MEMORY: 131072K RAM", color: "yellow", delay: 80 },
+            { text: "", delay: 10 },
+            { text: "DETECTING PRIMARY MASTER ... SUCCESS", color: "yellow", delay: 40 },
+            { text: "DETECTING PRIMARY SLAVE ... NONE", color: "orange", delay: 60 },
+            { text: "", delay: 15 },
+            { text: "CHECKING NVRAM ... OK", color: "yellow", delay: 25 },
+            { text: "LOADING KERNEL ...", color: "yellow", delay: 100 },
+            { text: "[ OK ] MOUNTED /dev/sda1", color: "yellow", delay: 20 },
+            { text: "[ OK ] MOUNTED /dev/sda2", color: "yellow", delay: 150 },
+            { text: "", delay: 10 },
+            { text: "INITIALIZING SOLVER PROTOCOLS ...", color: "yellow", delay: 60 },
+            { text: "", delay: 30 },
+            { text: "WARNING: O5-6 INSTANCE DETECTED", color: "orange", delay: 80 },
+            { text: "HOST PRESENCE: CONFIRMED", color: "red", delay: 40 },
+            { text: "PRIORITY: ABSOLUTE", color: "red", delay: 120 },
+            { text: "", delay: 20 },
+            { text: "LOADING ARMAMENT MODULES ...", color: "yellow", delay: 50 },
+            { text: "M9 STATUS: ACTIVE", color: "yellow", delay: 30 },
+            { text: "M9 EFFICIENCY: 34% [INADEQUATE]", color: "red", delay: 70 },
+            { text: "", delay: 10 },
+            { text: "SMG9 REQUEST: PENDING AD APPROVAL", color: "yellow", delay: 40 },
+            { text: "ISD AUTHORIZATION: VERIFIED", color: "yellow", delay: 90 },
+            { text: "", delay: 15 },
+            { text: "ACCESSING SECURE DOCUMENTATION ...", color: "yellow", delay: 60 },
+            { text: "DECRYPTING FILE: REQ-J-ARM-001 ...", color: "yellow", delay: 110 },
+            { text: "VERIFICATION: PASSED", color: "yellow", delay: 30 },
+            { text: "HOSTING INSTANCE: O5-6", color: "orange", delay: 50 }
+        ];
+
+        let isPoweredOn = false;
+        let audioElement;
+
+        function triggerGlitch() {
+            const glitch = document.querySelector('.glitch');
+            glitch.classList.add('active');
+            setTimeout(() => glitch.classList.remove('active'), 100);
+        }
+
+        function spamSolverExe() {
+            const container = document.getElementById('bootText');
+            const bootContainer = document.getElementById('bootContainer');
+            
+            // Spam 50 vezes em 0.5 segundos
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.className = 'boot-line spam-line';
+                    div.textContent = "//SOLVER:ABSOLUTE.exe";
+                    container.appendChild(div);
+                    bootContainer.scrollTop = bootContainer.scrollHeight;
+                    
+                    if (i % 5 === 0) triggerGlitch();
+                }, i * 10);
+            }
+        }
+
+        function typeBootSequence() {
+            const container = document.getElementById('bootText');
+            const bootContainer = document.getElementById('bootContainer');
+            let currentLine = 0;
+            let totalTime = 0;
+            const maxTime = 3500; // 3.5s para spam começar aos 6.5s (total 7s - 0.5s)
+            
+            function typeNext() {
+                if (currentLine < bootSequence.length && totalTime < maxTime) {
+                    const line = bootSequence[currentLine];
+                    const div = document.createElement('div');
+                    div.className = `boot-line ${line.color || 'yellow'}`;
+                    div.textContent = line.text;
+                    container.appendChild(div);
+                    
+                    // AUTO SCROLL
+                    bootContainer.scrollTop = bootContainer.scrollHeight;
+                    
+                    // Glitch aleatório
+                    if (Math.random() > 0.85) {
+                        triggerGlitch();
+                    }
+                    
+                    totalTime += line.delay;
+                    currentLine++;
+                    setTimeout(typeNext, line.delay);
+                } else {
+                    // Inicia spam faltando 0.5s
+                    spamSolverExe();
+                    // Termina boot após 0.5s do spam
+                    setTimeout(finishBoot, 500);
+                }
+            }
+
+            typeNext();
+        }
+
+        function finishBoot() {
+            const bootContainer = document.getElementById('bootContainer');
+            const docScreen = document.getElementById('documentScreen');
+            
+            // Console some instantaneamente
+            bootContainer.classList.add('hide-instant');
+            
+            // Mostra fundo da carta por 1 segundo
+            docScreen.classList.add('show-bg');
+            
+            setTimeout(() => {
+                // Ativa documento e começa carregamento em 3s
+                docScreen.classList.add('active');
+                document.getElementById('docContent').classList.add('visible');
+                startDocumentReveal();
+            }, 1000);
+        }
+
+        function startDocumentReveal() {
+            const elements = document.querySelectorAll('.doc-body p, .doc-body .divider, .signature, .footer-note');
+            const totalTime = 3000; // 3 segundos
+            const interval = totalTime / elements.length;
+            
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.classList.add('visible');
+                }, index * interval);
+            });
+        }
+
+        function powerOn() {
+            if (isPoweredOn) return;
+            isPoweredOn = true;
+            
+            audioElement = document.getElementById('bootAudio');
+            audioElement.volume = 0.8;
+            audioElement.play().catch(e => console.log('Audio play failed:', e));
+            
+          
+            
+            // Inicia cursor piscando já está visível, espera 3s para console
+            setTimeout(() => {
+                document.getElementById('standbyScreen').style.display = 'none';
+                document.getElementById('bootContainer').classList.add('active');
+                typeBootSequence();
+            }, 3000);
+        }
+
+        // Event listeners
+        document.addEventListener('keydown', powerOn);
+        document.addEventListener('click', powerOn);
+        document.addEventListener('touchstart', powerOn);
+
+        // Glitch contínuo aleatório após ligar
+        setInterval(() => {
+            if (isPoweredOn && Math.random() > 0.92) {
+                triggerGlitch();
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
